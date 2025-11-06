@@ -40,22 +40,30 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
      */
     @Override
     public Result queryById(Long id) {
+        //使用添加空缓存的方法改造查询，防止缓存穿透
         //尝试通过id在redis里查询
-        String shopJson = stringRedisTemplate.opsForValue().get(RedisConstants.CACHE_SHOP_KEY + id);
+        String key = RedisConstants.SHOP_TYPE_KEY+id;
+        String shopJson = stringRedisTemplate.opsForValue().get(key);
 
         //判断是否存在（缓存命中）
         if(StrUtil.isNotBlank(shopJson)){
-            //如果命中，返回商铺信息
+            //如果命中，且不是空值，返回商铺信息
             Shop shop = JSONUtil.toBean(shopJson, Shop.class);
             return Result.ok(shop);
         }
 
+        //如果存在，且是空值，返回一个null
+        if(shopJson!=null){//相当于shopJson==""
+            return Result.fail("店铺信息为空！");
+        }
+
         //未命中，通过id查询数据库
-        Shop shop = shopMapper.getById(id);
+        Shop shop = getById(id);
 
         //在数据库中查询商品是否存在
         if(shop==null){
-            //不存在，返回404
+            //不存在，将空值存入redis
+            stringRedisTemplate.opsForValue().set(RedisConstants.CACHE_SHOP_KEY+id,"",RedisConstants.CACHE_NULL_TTL,TimeUnit.MINUTES);
             return Result.fail("店铺不存在！");
         }
 
