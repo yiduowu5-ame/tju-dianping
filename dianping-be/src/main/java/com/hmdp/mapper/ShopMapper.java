@@ -2,6 +2,7 @@ package com.hmdp.mapper;
 
 import com.hmdp.entity.Shop;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Select;
 
 /**
  * <p>
@@ -13,4 +14,11 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  */
 public interface ShopMapper extends BaseMapper<Shop> {
 
+    /**
+     * 通过id查询店铺
+     * @param id
+     * @return
+     */
+    @Select("select * from tb_shop where id = #{id}")
+    Shop getById(Long id);
 }
