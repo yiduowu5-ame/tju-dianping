@@ -97,7 +97,7 @@ public class CacheClient {
         }
 
         LocalDateTime expireTime = null;
-        if (redisData != null) {
+          if (redisData != null) {
             expireTime = redisData.getExpireTime();
         }
 
